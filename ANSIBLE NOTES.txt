@@ -1,0 +1,125 @@
+-------------------------------------------------
+ANSIBLE CONFIGURATION
+-------------------------------------------------
+
+ansible --version
+ansible all -m ping
+useradd ansadmin
+passwd ansadmin
+
+visudo
+ansadmin ALL:ALL nopasswd
+
+/etc/ssh/sshd_config
+PasswordAuthentication yes
+service sshd restart
+systemctl restart sshd
+
+sudo su - ansadmin
+ssh-keygen -t rsa 
+cd .ssh
+
+ssh-copy-id hostname
+
+cd /etc/ansible
+hosts [inventory file]
+roles
+ansible.cfg
+
+ansible all -m ping
+-------------------------------------------------
+ANSIBLE DIRECTORY STRUCTURE
+-------------------------------------------------
+
+cd /etc/ansible
+hosts [inventory file]
+roles [Directory]
+ansible.cfg
+
+-i option for mentioning ansible current working directory
+
+Inventory file with group
+ansible hostname1:hostname2 -m ping 
+
+vi inventory
+[group1]
+localhost
+hostname1
+
+[group2]
+hostname2
+hostname3
+
+[group3:children]
+group1
+group2
+
+ansible group1:group2 -m ping 
+
+-------------------------------------------------
+ANSIBLE_CONFIG
+Current location
+/home/user/.ansible.cfg
+/etc/ansible
+
+-------------------------------------------------
+Ad-hoc commands
+ansible dbgroup -m ping
+ansible [-i CUSTOMINVENNTORY] dbgroup[:group2] -m shell -a "uptime"
+
+Playbooks 
+ansible-doc -l
+ansible-doc shell
+ansible-playbook
+--------------------------------------------------
+Module
+
+shell 
+copy
+fetch
+setup
+raw
+--------------------------------------------------
+ANSIBLE Facts
+
+setup module only
+Default facts and custom facts
+custom facts are used to get user defined required facts
+/etc/ansible/facts.d/ on managed nodes
+place one more custom facts files with extension as .fact
+output of fact file should be a json.
+
+git_ver = $(get --version | awk '{ print $3}' )
+httpd_version = $(/usr/sbin/httpd --version | awk 'NF ==1 { print $3}' )
+cat << EOF
+{ 
+"git_version" = "$git_ver",
+"httpd_version" = "$httpd_version"
+}
+
+ansible -i inventory localhost -m setup -a "filter=ansible_local"
+
+ansible all -m file -a "path=/etc/ansible/facts.d state=directory" -b
+
+ansible all -m copy -a "src=/etc/ansible/facts.d/git_httpd_v.fact dest=/etc/ansible/facts.d/git_httpd_v.fact mode='0755'" -b
+ansible -i inventory all -m setup -a "filter=ansible_local"
+-------------------------------------------------
+Debug module
+
+printanymsg.yml
+
+---
+ - name: "asfasdf"
+   hosts: localhost
+   tasks:
+   - line1
+     line2
+     line3
+   - debug: msg ="the hostname is {{inventory_hostname}}"
+
+ansible-playbook play.yml 
+-------------------------------------------------
+-------------------------------------------------
+-------------------------------------------------
+-------------------------------------------------
+https://www.youtube.com/watch?v=n4XcN1SraJQ&list=PL2qzCKTbjutIyQAe3GglWISLnLTQLGm7e&index=8
