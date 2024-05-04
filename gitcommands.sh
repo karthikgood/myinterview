@@ -44,3 +44,5 @@ git diff [source branch] [target branch} 	Preview changes before merging
 git mergetool --tool=opendiff
 
     To resolve the confilcts
+
+Last modified 04444/05/2024
